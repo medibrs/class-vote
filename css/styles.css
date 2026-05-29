@@ -505,6 +505,12 @@ img {
   color: #fca5a5;
 }
 
+.deadline-banner.pending {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #c084fc;
+}
+
 /* --- Voting Closed Card State --- */
 .category-card.voting-closed {
   opacity: 0.6;

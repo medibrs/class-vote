@@ -16,7 +16,6 @@ const ADMIN_EMAILS = [
   'jessica@gritlab.ax',
   'anna-lena@gritlab.ax',
   'carolina@gritlab.ax',
-  'mohamed.bouras@gritlab.ax'
 ];
 
 const { createClient } = supabase;
@@ -42,14 +41,43 @@ const CATEGORIES = [
 // Default avatar path
 const DEFAULT_AVATAR = './assets/default-avatar.svg';
 
+// Voting start: May 30, 2026 at 10:00 Finland time (EEST = UTC+3)
+const VOTE_START_TIME = new Date('2026-05-30T10:00:00+03:00');
+
 // Voting deadline: June 2, 2026 at 23:59 Finland time (EEST = UTC+3)
 const VOTE_DEADLINE = new Date('2026-06-02T23:59:00+03:00');
 
 /**
- * Check if voting is still open
+ * Check if voting has started
+ */
+function hasVotingStarted() {
+  return new Date() >= VOTE_START_TIME;
+}
+
+/**
+ * Check if voting is currently active (after start time and before deadline)
  */
 function isVotingOpen() {
-  return new Date() < VOTE_DEADLINE;
+  const now = new Date();
+  return now >= VOTE_START_TIME && now < VOTE_DEADLINE;
+}
+
+/**
+ * Get time until voting starts as a formatted string
+ */
+function getTimeUntilStart() {
+  const now = new Date();
+  const diff = VOTE_START_TIME - now;
+
+  if (diff <= 0) return null;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 /**

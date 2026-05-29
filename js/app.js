@@ -134,8 +134,11 @@ function renderCategoryCards() {
     }
 
     const votingOpen = isVotingOpen();
+    const hasStarted = hasVotingStarted();
     let statusHtml;
-    if (!votingOpen) {
+    if (!hasStarted) {
+      statusHtml = `<span class="category-status">⏰ Not started</span>`;
+    } else if (!votingOpen) {
       statusHtml = vote
         ? `<span class="category-status voted">✅ Voted</span>`
         : `<span class="category-status">⏰ Voting closed</span>`;
@@ -517,7 +520,12 @@ function updateDeadlineDisplay() {
   const deadlineEl = document.getElementById('deadline-display');
   if (!deadlineEl) return;
 
-  if (isVotingOpen()) {
+  const now = new Date();
+  if (now < VOTE_START_TIME) {
+    const untilStart = getTimeUntilStart();
+    deadlineEl.innerHTML = `⏰ <strong>Starts in ${untilStart || 'under a minute'}</strong> — May 30, 10:00 AM (Finland time)`;
+    deadlineEl.className = 'deadline-banner pending';
+  } else if (isVotingOpen()) {
     const remaining = getTimeRemaining();
     deadlineEl.innerHTML = `⏰ <strong>${remaining}</strong> — Deadline: June 2, 23:59 (Finland time)`;
     deadlineEl.className = 'deadline-banner open';
