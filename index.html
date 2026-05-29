@@ -50,6 +50,15 @@
   <script>
     // Check for error in URL params
     document.addEventListener('DOMContentLoaded', async () => {
+      // Check if site is locked
+      if (SITE_LOCKED) {
+        document.getElementById('google-sign-in-btn').disabled = true;
+        document.getElementById('google-sign-in-btn').textContent = '🔒 Coming Soon';
+        document.querySelector('.login-subtitle').innerHTML =
+          'The voting site is currently under maintenance.<br>We\'ll be back soon! 🚧';
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       if (params.get('error') === 'domain') {
         showLoginError('Only @gritlab.ax email addresses are allowed.');

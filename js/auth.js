@@ -7,12 +7,17 @@
  * Sign in with Google OAuth
  */
 async function signInWithGoogle() {
+  if (SITE_LOCKED) {
+    showLoginError('🔒 The site is currently under maintenance. Please come back later!');
+    return;
+  }
+
   const { data, error } = await _supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/app',
       queryParams: {
-        hd: 'gritlab.ax',               // Hint to Google to show only gritlab.ax accounts
+        hd: 'gritlab.ax',
         prompt: 'select_account',
       },
     },
@@ -90,6 +95,11 @@ function showLoginError(message) {
  * Call this on page load for app.html, profile.html, results.html
  */
 async function requireAuth() {
+  if (SITE_LOCKED) {
+    window.location.href = '/';
+    return null;
+  }
+
   const session = await getSession();
 
   if (!session) {

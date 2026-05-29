@@ -8,6 +8,9 @@
 const SUPABASE_URL = 'https://ozbrgtxjyybxxdjxucez.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96YnJndHhqeXlieHhkanh1Y2V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTA5MDQsImV4cCI6MjA5NTYyNjkwNH0.mUQTpSKdPVc5hmYrxBF2U9P0VAtPY9RWn0in2nQTKKs';
 
+// 🔒 SITE LOCKDOWN — set to true to block all access
+const SITE_LOCKED = true;
+
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
