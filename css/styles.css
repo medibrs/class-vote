@@ -608,6 +608,17 @@ img {
   color: var(--success);
 }
 
+.voted-for-motivation {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
 /* Animation delays for cards */
 .category-card:nth-child(1) { animation-delay: 0.05s; }
 .category-card:nth-child(2) { animation-delay: 0.1s; }
@@ -810,6 +821,155 @@ img {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
+}
+
+/* --- Modal Header Layout --- */
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.modal-back {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all var(--transition-fast);
+}
+
+.modal-back:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+}
+
+/* --- Motivation Step --- */
+.motivation-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--border);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.motivation-header img {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+
+.motivation-header-info {
+  flex: 1;
+}
+
+.motivation-header-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.motivation-header-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.motivation-section {
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.motivation-prompt {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.motivation-existing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.motivation-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.motivation-chip:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
+
+.motivation-chip.selected {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--primary);
+}
+
+.motivation-chip-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.motivation-chip-text {
+  flex: 1;
+}
+
+.motivation-chip-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--glass-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.motivation-write {
+  margin-bottom: var(--space-md);
+}
+
+.motivation-write textarea {
+  resize: vertical;
+  min-height: 70px;
+  max-height: 120px;
+}
+
+.motivation-actions {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.motivation-actions .btn {
+  flex: 1;
+}
+
+.motivation-empty {
+  text-align: center;
+  padding: var(--space-md);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 /* --- Profile Page --- */

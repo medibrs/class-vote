@@ -1,11 +1,13 @@
 // ============================================
-// Voting Page Logic
+// Voting Page Logic (with Motivations)
 // ============================================
 
 let allProfiles = [];
-let currentVotes = {};  // { category_id: { nominee_id, nominee_name, nominee_avatar } }
+let currentVotes = {};  // { category_id: { nominee_id, nominee_name, nominee_avatar, motivation_id, motivation_text } }
 let currentUserId = null;
 let activeCategory = null;
+let selectedNomineeId = null;
+let selectedMotivationId = null;
 
 /**
  * Initialize the voting page
@@ -23,11 +25,24 @@ async function initVotingPage() {
   updateStats();
   updateDeadlineDisplay();
 
+  // Character counter for motivation textarea
+  const motivationInput = document.getElementById('motivation-input');
+  if (motivationInput) {
+    motivationInput.addEventListener('input', () => {
+      document.getElementById('motivation-char-count').textContent = motivationInput.value.length;
+      // Deselect any selected chip when typing
+      if (motivationInput.value.trim()) {
+        selectedMotivationId = null;
+        document.querySelectorAll('.motivation-chip.selected').forEach(el => el.classList.remove('selected'));
+      }
+    });
+  }
+
   // Update countdown every minute
   setInterval(() => {
     updateDeadlineDisplay();
     if (!isVotingOpen()) {
-      renderCategoryCards(); // Re-render to disable cards
+      renderCategoryCards();
     }
   }, 60000);
 }
@@ -51,7 +66,7 @@ async function loadProfiles() {
 }
 
 /**
- * Load current user's existing votes
+ * Load current user's existing votes (with motivation info)
  */
 async function loadMyVotes() {
   const { data, error } = await _supabase
@@ -59,10 +74,15 @@ async function loadMyVotes() {
     .select(`
       category,
       nominee_id,
+      motivation_id,
       profiles!votes_nominee_id_fkey (
         id,
         display_name,
         avatar_url
+      ),
+      motivations (
+        id,
+        message
       )
     `)
     .eq('voter_id', currentUserId);
@@ -76,10 +96,13 @@ async function loadMyVotes() {
   if (data) {
     data.forEach(vote => {
       const nominee = vote.profiles;
+      const motivation = vote.motivations;
       currentVotes[vote.category] = {
         nominee_id: vote.nominee_id,
         nominee_name: nominee ? nominee.display_name : 'Unknown',
         nominee_avatar: nominee ? getAvatarUrl(nominee) : DEFAULT_AVATAR,
+        motivation_id: vote.motivation_id,
+        motivation_text: motivation ? motivation.message : null,
       };
     });
   }
@@ -94,12 +117,21 @@ function renderCategoryCards() {
 
   grid.innerHTML = CATEGORIES.map(cat => {
     const vote = currentVotes[cat.id];
-    const votedHtml = vote ? `
-      <div class="voted-for">
-        <img class="voted-for-avatar" src="${vote.nominee_avatar}" alt="${vote.nominee_name}" onerror="this.src='${DEFAULT_AVATAR}'">
-        <span class="voted-for-name">${vote.nominee_name}</span>
-      </div>
-    ` : '';
+    let votedHtml = '';
+    if (vote) {
+      const motivationLine = vote.motivation_text
+        ? `<div class="voted-for-motivation">"${vote.motivation_text}"</div>`
+        : '';
+      votedHtml = `
+        <div class="voted-for">
+          <img class="voted-for-avatar" src="${vote.nominee_avatar}" alt="${vote.nominee_name}" onerror="this.src='${DEFAULT_AVATAR}'">
+          <div>
+            <span class="voted-for-name">${vote.nominee_name}</span>
+            ${motivationLine}
+          </div>
+        </div>
+      `;
+    }
 
     const votingOpen = isVotingOpen();
     let statusHtml;
@@ -128,11 +160,14 @@ function renderCategoryCards() {
 }
 
 /**
- * Open the voting modal for a category
+ * Open the voting modal for a category (Step 1: pick nominee)
  */
 function openVoteModal(categoryId) {
   activeCategory = CATEGORIES.find(c => c.id === categoryId);
   if (!activeCategory) return;
+
+  selectedNomineeId = null;
+  selectedMotivationId = null;
 
   const overlay = document.getElementById('vote-modal');
   const title = document.getElementById('modal-category-title');
@@ -141,6 +176,9 @@ function openVoteModal(categoryId) {
   if (title) {
     title.innerHTML = `${activeCategory.emoji} ${activeCategory.name}`;
   }
+
+  // Show step 1, hide step 2
+  showModalStep('nominee');
 
   renderNomineeList('');
 
@@ -152,12 +190,42 @@ function openVoteModal(categoryId) {
 }
 
 /**
+ * Show a specific modal step
+ */
+function showModalStep(step) {
+  const stepNominee = document.getElementById('modal-step-nominee');
+  const stepMotivation = document.getElementById('modal-step-motivation');
+  const backBtn = document.getElementById('modal-back-btn');
+
+  if (step === 'nominee') {
+    stepNominee.style.display = '';
+    stepMotivation.style.display = 'none';
+    backBtn.style.display = 'none';
+  } else {
+    stepNominee.style.display = 'none';
+    stepMotivation.style.display = '';
+    backBtn.style.display = '';
+  }
+}
+
+/**
+ * Go back from motivation step to nominee step
+ */
+function goBackToNominees() {
+  selectedNomineeId = null;
+  selectedMotivationId = null;
+  showModalStep('nominee');
+}
+
+/**
  * Close the voting modal
  */
 function closeVoteModal() {
   const overlay = document.getElementById('vote-modal');
   overlay.classList.remove('active');
   activeCategory = null;
+  selectedNomineeId = null;
+  selectedMotivationId = null;
 }
 
 /**
@@ -169,9 +237,8 @@ function renderNomineeList(searchTerm) {
 
   const term = searchTerm.toLowerCase().trim();
 
-  // Filter out current user and apply search
   const nominees = allProfiles.filter(p => {
-    if (p.id === currentUserId) return false; // Can't vote for self
+    if (p.id === currentUserId) return false;
     if (term) {
       const name = (p.display_name || '').toLowerCase();
       const email = (p.email || '').toLowerCase();
@@ -198,7 +265,7 @@ function renderNomineeList(searchTerm) {
     const name = p.display_name || p.email.split('@')[0];
 
     return `
-      <div class="nominee-item ${isSelected ? 'selected' : ''}" onclick="castVote('${p.id}')" id="nominee-${p.id}">
+      <div class="nominee-item ${isSelected ? 'selected' : ''}" onclick="selectNominee('${p.id}')" id="nominee-${p.id}">
         <img class="nominee-avatar" src="${avatar}" alt="${name}" onerror="this.src='${DEFAULT_AVATAR}'">
         <div class="nominee-info">
           <div class="nominee-name">${name}</div>
@@ -211,33 +278,187 @@ function renderNomineeList(searchTerm) {
 }
 
 /**
- * Cast or update a vote
+ * Select a nominee → go to motivation step
  */
-async function castVote(nomineeId) {
+async function selectNominee(nomineeId) {
   if (!activeCategory) return;
 
-  // Check deadline
   if (!isVotingOpen()) {
-    showToast('Voting has closed! Deadline was June 2, 23:59 Finland time.', 'error');
+    showToast('Voting has closed!', 'error');
+    closeVoteModal();
+    return;
+  }
+
+  selectedNomineeId = nomineeId;
+  selectedMotivationId = null;
+
+  const nominee = allProfiles.find(p => p.id === nomineeId);
+  const nomineeName = nominee ? (nominee.display_name || nominee.email.split('@')[0]) : 'Unknown';
+  const nomineeAvatar = nominee ? getAvatarUrl(nominee) : DEFAULT_AVATAR;
+
+  // Update motivation header
+  const header = document.getElementById('motivation-header');
+  header.innerHTML = `
+    <img src="${nomineeAvatar}" alt="${nomineeName}" onerror="this.src='${DEFAULT_AVATAR}'">
+    <div class="motivation-header-info">
+      <div class="motivation-header-name">${nomineeName}</div>
+      <div class="motivation-header-label">for ${activeCategory.emoji} ${activeCategory.name}</div>
+    </div>
+  `;
+
+  // Clear the textarea
+  const motivationInput = document.getElementById('motivation-input');
+  if (motivationInput) {
+    motivationInput.value = '';
+    document.getElementById('motivation-char-count').textContent = '0';
+  }
+
+  // Load existing motivations for this nominee+category
+  await loadExistingMotivations(activeCategory.id, nomineeId);
+
+  // Show step 2
+  showModalStep('motivation');
+}
+
+/**
+ * Load existing motivations for a nominee in a category
+ */
+async function loadExistingMotivations(categoryId, nomineeId) {
+  const list = document.getElementById('motivation-existing-list');
+  if (!list) return;
+
+  const { data, error } = await _supabase
+    .from('motivations')
+    .select('id, message')
+    .eq('category', categoryId)
+    .eq('nominee_id', nomineeId);
+
+  if (error) {
+    console.error('Failed to load motivations:', error);
+    list.innerHTML = '';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="motivation-empty">Be the first to write a motivation! ✍️</div>';
+    return;
+  }
+
+  // Count how many votes use each motivation
+  const { data: votesData } = await _supabase
+    .from('votes')
+    .select('motivation_id')
+    .eq('category', categoryId)
+    .eq('nominee_id', nomineeId)
+    .not('motivation_id', 'is', null);
+
+  const motivationCounts = {};
+  if (votesData) {
+    votesData.forEach(v => {
+      motivationCounts[v.motivation_id] = (motivationCounts[v.motivation_id] || 0) + 1;
+    });
+  }
+
+  list.innerHTML = data.map(m => {
+    const count = motivationCounts[m.id] || 0;
+    const countLabel = count > 0 ? `${count} vote${count > 1 ? 's' : ''}` : '';
+    return `
+      <div class="motivation-chip" onclick="selectMotivation('${m.id}', this)" id="motivation-${m.id}">
+        <span class="motivation-chip-icon">💬</span>
+        <span class="motivation-chip-text">${escapeHtml(m.message)}</span>
+        ${countLabel ? `<span class="motivation-chip-count">${countLabel}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * Select an existing motivation chip
+ */
+function selectMotivation(motivationId, element) {
+  // Deselect all chips
+  document.querySelectorAll('.motivation-chip.selected').forEach(el => el.classList.remove('selected'));
+  
+  // Select this one
+  element.classList.add('selected');
+  selectedMotivationId = motivationId;
+
+  // Clear the text input since they picked an existing one
+  const motivationInput = document.getElementById('motivation-input');
+  if (motivationInput) {
+    motivationInput.value = '';
+    document.getElementById('motivation-char-count').textContent = '0';
+  }
+}
+
+/**
+ * Submit vote with a NEW motivation (written in textarea)
+ */
+async function submitVoteWithNewMotivation() {
+  const motivationInput = document.getElementById('motivation-input');
+  const message = motivationInput ? motivationInput.value.trim() : '';
+
+  if (selectedMotivationId) {
+    // They selected an existing motivation
+    await submitVoteWithMotivation(selectedMotivationId);
+    return;
+  }
+
+  if (!message) {
+    // No motivation written and none selected — submit without
+    await submitVoteWithMotivation(null);
+    return;
+  }
+
+  // Create the new motivation
+  const { data: newMotivation, error } = await _supabase
+    .from('motivations')
+    .upsert(
+      {
+        category: activeCategory.id,
+        nominee_id: selectedNomineeId,
+        message: message,
+        created_by: currentUserId,
+      },
+      { onConflict: 'category,nominee_id,message' }
+    )
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Motivation create error:', error);
+    showToast('Failed to save motivation. Voting without it.', 'error');
+    await submitVoteWithMotivation(null);
+    return;
+  }
+
+  await submitVoteWithMotivation(newMotivation.id, message);
+}
+
+/**
+ * Submit the vote with an optional motivation_id
+ */
+async function submitVoteWithMotivation(motivationId, motivationText) {
+  if (!activeCategory || !selectedNomineeId) return;
+
+  if (!isVotingOpen()) {
+    showToast('Voting has closed!', 'error');
     closeVoteModal();
     return;
   }
 
   const categoryId = activeCategory.id;
 
-  // Upsert: insert or update if exists
+  const voteData = {
+    voter_id: currentUserId,
+    nominee_id: selectedNomineeId,
+    category: categoryId,
+    motivation_id: motivationId || null,
+  };
+
   const { error } = await _supabase
     .from('votes')
-    .upsert(
-      {
-        voter_id: currentUserId,
-        nominee_id: nomineeId,
-        category: categoryId,
-      },
-      {
-        onConflict: 'voter_id,category',
-      }
-    );
+    .upsert(voteData, { onConflict: 'voter_id,category' });
 
   if (error) {
     console.error('Vote error:', error);
@@ -250,16 +471,24 @@ async function castVote(nomineeId) {
   }
 
   // Update local state
-  const nominee = allProfiles.find(p => p.id === nomineeId);
+  const nominee = allProfiles.find(p => p.id === selectedNomineeId);
+
+  // If we selected an existing motivation but don't have the text, fetch it
+  if (motivationId && !motivationText) {
+    const chip = document.querySelector(`#motivation-${motivationId} .motivation-chip-text`);
+    motivationText = chip ? chip.textContent : null;
+  }
+
   currentVotes[categoryId] = {
-    nominee_id: nomineeId,
+    nominee_id: selectedNomineeId,
     nominee_name: nominee ? nominee.display_name : 'Unknown',
     nominee_avatar: nominee ? getAvatarUrl(nominee) : DEFAULT_AVATAR,
+    motivation_id: motivationId,
+    motivation_text: motivationText || null,
   };
 
   showToast(`Voted for ${currentVotes[categoryId].nominee_name}!`, 'success');
 
-  // Refresh UI
   renderCategoryCards();
   updateStats();
   closeVoteModal();
@@ -303,6 +532,15 @@ function updateDeadlineDisplay() {
  */
 function handleModalSearch(event) {
   renderNomineeList(event.target.value);
+}
+
+/**
+ * Escape HTML to prevent XSS in motivation text
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 // --- Toast Notification System ---

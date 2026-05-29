@@ -73,24 +73,69 @@
     </main>
   </div>
 
-  <!-- Voting Modal -->
+  <!-- Voting Modal (2 steps: pick person → add motivation) -->
   <div class="modal-overlay" id="vote-modal">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="modal-category-title">Category</h2>
+        <div class="modal-header-left">
+          <button class="modal-back" onclick="goBackToNominees()" id="modal-back-btn" aria-label="Back" style="display:none;">←</button>
+          <h2 id="modal-category-title">Category</h2>
+        </div>
         <button class="modal-close" onclick="closeVoteModal()" id="modal-close-btn" aria-label="Close">✕</button>
       </div>
-      <div class="modal-search">
-        <input
-          type="text"
-          id="modal-search-input"
-          placeholder="Search classmates..."
-          oninput="handleModalSearch(event)"
-          autocomplete="off"
-        >
+
+      <!-- Step 1: Pick a nominee -->
+      <div id="modal-step-nominee">
+        <div class="modal-search">
+          <input
+            type="text"
+            id="modal-search-input"
+            placeholder="Search classmates..."
+            oninput="handleModalSearch(event)"
+            autocomplete="off"
+          >
+        </div>
+        <div class="modal-body" id="nominee-list">
+          <!-- Rendered by JS -->
+        </div>
       </div>
-      <div class="modal-body" id="nominee-list">
-        <!-- Rendered by JS -->
+
+      <!-- Step 2: Add motivation -->
+      <div id="modal-step-motivation" style="display:none;">
+        <div class="motivation-header" id="motivation-header">
+          <!-- Shows who you're voting for -->
+        </div>
+        <div class="modal-body" id="motivation-body">
+          <div class="motivation-section">
+            <p class="motivation-prompt">Why do they deserve this? 💬</p>
+
+            <!-- Existing motivations to pick from -->
+            <div class="motivation-existing" id="motivation-existing-list">
+              <!-- Rendered by JS -->
+            </div>
+
+            <!-- Write your own -->
+            <div class="motivation-write">
+              <textarea
+                id="motivation-input"
+                class="form-input"
+                placeholder="Write your own motivation..."
+                maxlength="200"
+                rows="3"
+              ></textarea>
+              <p class="form-hint"><span id="motivation-char-count">0</span>/200 characters</p>
+            </div>
+          </div>
+
+          <div class="motivation-actions">
+            <button class="btn btn-secondary" onclick="submitVoteWithMotivation(null)" id="skip-motivation-btn">
+              Skip
+            </button>
+            <button class="btn btn-primary" onclick="submitVoteWithNewMotivation()" id="submit-motivation-btn">
+              Vote ✨
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
