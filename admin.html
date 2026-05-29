@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="See who your classmates voted for. Leaderboards and results for all categories.">
-  <title>Class Vote 🗳️ — Results</title>
+  <meta name="description" content="Admin dashboard — manage users and admins.">
+  <title>Class Vote 🗳️ — Admin</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
   <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -22,9 +22,9 @@
       </a>
       <ul class="navbar-nav">
         <li><a href="/app" id="nav-vote">🗳️ Vote</a></li>
-        <li><a href="/results" class="active" id="nav-results">🏆 Results</a></li>
+        <li><a href="/results" id="nav-results">🏆 Results</a></li>
         <li><a href="/profile" id="nav-profile">👤 Profile</a></li>
-        <li><a href="/admin" id="nav-admin" style="display:none;">⚙️ Admin</a></li>
+        <li><a href="/admin" class="active" id="nav-admin">⚙️ Admin</a></li>
       </ul>
       <div class="navbar-user">
         <span class="navbar-username" id="navbar-username"></span>
@@ -36,32 +36,41 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="page-header">
-        <h1>🏆 Results</h1>
-        <p>See who's leading in each category</p>
+        <h1>⚙️ Admin Dashboard</h1>
+        <p>Manage admins and view registered users</p>
       </div>
 
-      <!-- Stats Bar -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <div class="stat-value" id="stat-total-voters">0</div>
-          <div class="stat-label">Total Voters</div>
+      <!-- Admins Section -->
+      <section class="admin-section">
+        <div class="admin-section-header">
+          <h2>👑 Admins</h2>
+          <span class="admin-section-count" id="admin-count">0</span>
         </div>
-        <div class="stat-item">
-          <div class="stat-value" id="stat-total-votes">0</div>
-          <div class="stat-label">Total Votes</div>
-        </div>
-      </div>
-
-      <!-- Results Grid -->
-      <div class="results-grid" id="results-grid">
-        <!-- Rendered by JS -->
-        <div class="loading-container" style="grid-column: 1 / -1;">
-          <div>
-            <div class="spinner"></div>
-            <div class="loading-text">Loading results...</div>
+        <div class="admin-user-list" id="admin-list">
+          <div class="loading-container">
+            <div>
+              <div class="spinner"></div>
+              <div class="loading-text">Loading admins...</div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Users Section -->
+      <section class="admin-section">
+        <div class="admin-section-header">
+          <h2>👥 Registered Users</h2>
+          <span class="admin-section-count" id="user-count">0</span>
+        </div>
+        <div class="admin-user-list" id="user-list">
+          <div class="loading-container">
+            <div>
+              <div class="spinner"></div>
+              <div class="loading-text">Loading users...</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -72,6 +81,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./js/supabase.js"></script>
   <script src="./js/auth.js"></script>
-  <script src="./js/results.js"></script>
+  <script src="./js/admin.js"></script>
 </body>
 </html>

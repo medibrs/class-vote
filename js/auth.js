@@ -190,9 +190,16 @@ async function populateNavbar() {
     nameEl.textContent = profile.display_name || profile.email.split('@')[0];
   }
 
-  // Hide Results link for non-admins
+  // Hide/Show Results and Admin links based on role
+  const isAdminUser = isAdmin(profile.email);
+
   const resultsLink = document.getElementById('nav-results');
-  if (resultsLink && !isAdmin(profile.email)) {
-    resultsLink.parentElement.style.display = 'none';
+  if (resultsLink) {
+    resultsLink.parentElement.style.display = isAdminUser ? '' : 'none';
+  }
+
+  const adminLink = document.getElementById('nav-admin');
+  if (adminLink) {
+    adminLink.parentElement.style.display = isAdminUser ? '' : 'none';
   }
 }
