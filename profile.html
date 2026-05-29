@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Edit your Class Vote profile. Update your name and photo.">
+  <title>Class Vote 🗳️ — Profile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-orbs">
+    <div class="bg-orb-extra"></div>
+  </div>
+
+  <div class="page-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <a href="/app" class="navbar-brand">
+        <span>🗳️</span> Class Vote
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/app" id="nav-vote">🗳️ Vote</a></li>
+        <li><a href="/results" id="nav-results">🏆 Results</a></li>
+        <li><a href="/profile" class="active" id="nav-profile">👤 Profile</a></li>
+      </ul>
+      <div class="navbar-user">
+        <span class="navbar-username" id="navbar-username"></span>
+        <img class="navbar-avatar" id="navbar-avatar" src="./assets/default-avatar.svg" alt="Avatar">
+        <button class="btn btn-sm btn-secondary" onclick="signOut()" id="sign-out-btn">Sign Out</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>👤 Your Profile</h1>
+        <p>Customize how classmates see you</p>
+      </div>
+
+      <div class="profile-container">
+        <div class="glass-card profile-card">
+          <!-- Avatar Section -->
+          <div class="profile-avatar-section">
+            <div class="profile-avatar-wrapper">
+              <img class="profile-avatar" id="profile-avatar" src="./assets/default-avatar.svg" alt="Your avatar">
+              <label class="profile-avatar-overlay" for="avatar-input" id="avatar-overlay-label">
+                📷
+              </label>
+              <input
+                type="file"
+                class="profile-avatar-input"
+                id="avatar-input"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onchange="handleAvatarUpload(event)"
+              >
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Click to change photo</p>
+          </div>
+
+          <!-- Form -->
+          <div class="form-group">
+            <label class="form-label" for="profile-name">Display Name</label>
+            <input
+              type="text"
+              class="form-input"
+              id="profile-name"
+              placeholder="Your display name"
+              maxlength="50"
+            >
+            <p class="form-hint">This is the name your classmates will see</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-email">Email</label>
+            <input
+              type="email"
+              class="form-input"
+              id="profile-email"
+              disabled
+              placeholder="your.email@gritlab.ax"
+            >
+            <p class="form-hint">Email cannot be changed (linked to your Google account)</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="profile-actions">
+            <button class="btn btn-primary" id="profile-save-btn" onclick="saveProfile()">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/supabase.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/profile.js"></script>
+</body>
+</html>

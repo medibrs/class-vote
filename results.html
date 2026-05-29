@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="See who your classmates voted for. Leaderboards and results for all categories.">
+  <title>Class Vote 🗳️ — Results</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-orbs">
+    <div class="bg-orb-extra"></div>
+  </div>
+
+  <div class="page-container">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <a href="/app" class="navbar-brand">
+        <span>🗳️</span> Class Vote
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/app" id="nav-vote">🗳️ Vote</a></li>
+        <li><a href="/results" class="active" id="nav-results">🏆 Results</a></li>
+        <li><a href="/profile" id="nav-profile">👤 Profile</a></li>
+      </ul>
+      <div class="navbar-user">
+        <span class="navbar-username" id="navbar-username"></span>
+        <img class="navbar-avatar" id="navbar-avatar" src="./assets/default-avatar.svg" alt="Avatar">
+        <button class="btn btn-sm btn-secondary" onclick="signOut()" id="sign-out-btn">Sign Out</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>🏆 Results</h1>
+        <p>See who's leading in each category</p>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="stat-total-voters">0</div>
+          <div class="stat-label">Total Voters</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-total-votes">0</div>
+          <div class="stat-label">Total Votes</div>
+        </div>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="results-grid" id="results-grid">
+        <!-- Rendered by JS -->
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div>
+            <div class="spinner"></div>
+            <div class="loading-text">Loading results...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/supabase.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/results.js"></script>
+</body>
+</html>
