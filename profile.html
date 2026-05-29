@@ -45,19 +45,19 @@
         <div class="glass-card profile-card">
           <!-- Avatar Section -->
           <div class="profile-avatar-section">
-            <div class="profile-avatar-wrapper">
+            <div class="profile-avatar-wrapper" onclick="document.getElementById('avatar-input').click()">
               <img class="profile-avatar" id="profile-avatar" src="./assets/default-avatar.svg" alt="Your avatar">
-              <label class="profile-avatar-overlay" for="avatar-input" id="avatar-overlay-label">
+              <div class="profile-avatar-overlay" id="avatar-overlay-label">
                 📷
-              </label>
-              <input
-                type="file"
-                class="profile-avatar-input"
-                id="avatar-input"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onchange="handleAvatarUpload(event)"
-              >
+              </div>
             </div>
+            <input
+              type="file"
+              class="profile-avatar-input"
+              id="avatar-input"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onchange="handleAvatarUpload(event)"
+            >
             <p style="color: var(--text-muted); font-size: 0.85rem;">Click to change photo</p>
           </div>
 

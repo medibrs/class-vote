@@ -1014,7 +1014,10 @@ img {
 
 .profile-avatar-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: var(--radius-full);
   background: rgba(0, 0, 0, 0.5);
   display: flex;
@@ -1025,9 +1028,12 @@ img {
   transition: opacity var(--transition-fast);
   color: white;
   font-size: 1.5rem;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
 }
 
-.profile-avatar-wrapper:hover .profile-avatar-overlay {
+.profile-avatar-wrapper:hover .profile-avatar-overlay,
+.profile-avatar-wrapper:active .profile-avatar-overlay {
   opacity: 1;
 }
 
@@ -1036,7 +1042,19 @@ img {
 }
 
 .profile-avatar-input {
-  display: none;
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* On touch devices, keep overlay slightly visible so users know it's tappable */
+@media (hover: none) {
+  .profile-avatar-overlay {
+    opacity: 0.6;
+  }
 }
 
 .form-group {
