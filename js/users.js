@@ -1,27 +1,26 @@
 // ============================================
-// Admin Page Logic
+// Users Page Logic
 // ============================================
 
 /**
- * Initialize the admin page
+ * Initialize the users page
  */
-async function initAdminPage() {
+async function initUsersPage() {
   const session = await requireAdmin();
   if (!session) return;
 
   await populateNavbar();
-
-  // Show admin nav link
-  const adminLink = document.getElementById('nav-admin');
-  if (adminLink) adminLink.parentElement.style.display = '';
-
-  await loadAllUsers();
+  await loadClassmates();
 }
 
 /**
- * Load all users and filter for admins
+ * Load and display registered users (classmates)
  */
-async function loadAllUsers() {
+async function loadClassmates() {
+  const list = document.getElementById('user-list');
+  const count = document.getElementById('user-count');
+  if (!list) return;
+
   const { data, error } = await _supabase
     .from('profiles')
     .select('*')
@@ -29,53 +28,50 @@ async function loadAllUsers() {
 
   if (error) {
     console.error('Failed to load users:', error);
-    return;
-  }
-
-  const admins = (data || []).filter(profile => isAdmin(profile.email));
-  renderAdminList(admins);
-}
-
-/**
- * Render the admins list
- */
-function renderAdminList(admins) {
-  const list = document.getElementById('admin-list');
-  const count = document.getElementById('admin-count');
-  if (!list) return;
-
-  if (count) count.textContent = admins.length;
-
-  if (admins.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">👑</div>
-        <h3>No admins registered yet</h3>
+        <div class="empty-state-icon">❌</div>
+        <h3>Failed to load classmates</h3>
+        <p>Please try refreshing the page.</p>
       </div>
     `;
     return;
   }
 
-  list.innerHTML = admins.map(p => renderUserCard(p, true)).join('');
+  // Filter out admins to get only regular users
+  const classmates = (data || []).filter(profile => !isAdmin(profile.email));
+
+  if (count) count.textContent = classmates.length;
+
+  if (classmates.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h3>No users registered yet</h3>
+        <p>Share the link with your classmates!</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = classmates.map(p => renderUserCard(p)).join('');
 }
 
 /**
  * Render a single user card
  */
-function renderUserCard(profile, isAdminUser) {
+function renderUserCard(profile) {
   const avatar = (profile.avatar_url) ? profile.avatar_url : DEFAULT_AVATAR;
   const name = profile.display_name || profile.email.split('@')[0];
   const joinDate = new Date(profile.created_at).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric'
   });
 
-  const badge = isAdminUser ? '<span class="admin-badge">👑 Admin</span>' : '';
-
   return `
     <div class="admin-user-card">
       <img class="admin-user-avatar" src="${avatar}" alt="${name}" onerror="this.src='${DEFAULT_AVATAR}'">
       <div class="admin-user-info">
-        <div class="admin-user-name">${name} ${badge}</div>
+        <div class="admin-user-name">${name}</div>
         <div class="admin-user-email">${profile.email}</div>
       </div>
       <div class="admin-user-joined">
@@ -86,4 +82,4 @@ function renderUserCard(profile, isAdminUser) {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', initAdminPage);
+document.addEventListener('DOMContentLoaded', initUsersPage);

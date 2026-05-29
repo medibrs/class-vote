@@ -1597,3 +1597,45 @@ img {
   }
 }
 
+/* --- Results Page Motivations --- */
+.result-item-wrapper {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: var(--space-md) 0;
+}
+
+.result-item-wrapper:last-child {
+  border-bottom: none;
+}
+
+.result-item-wrapper .result-item {
+  border-bottom: none !important;
+  padding: 0 !important;
+}
+
+.result-item-motivations {
+  margin-top: var(--space-sm);
+  margin-left: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.result-motivation-bubble {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.03);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--primary-light);
+  display: inline-block;
+  max-width: fit-content;
+}
+
+@media (max-width: 480px) {
+  .result-item-motivations {
+    margin-left: var(--space-lg);
+  }
+}
+
+

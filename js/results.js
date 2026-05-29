@@ -30,7 +30,7 @@ async function loadResults() {
     </div>
   `;
 
-  // Fetch all votes with nominee profiles
+  // Fetch all votes with nominee profiles and motivations
   const { data: votes, error } = await _supabase
     .from('votes')
     .select(`
@@ -41,6 +41,9 @@ async function loadResults() {
         display_name,
         avatar_url,
         email
+      ),
+      motivations (
+        message
       )
     `);
 
@@ -88,9 +91,15 @@ async function loadResults() {
           avatar: getAvatarUrl(nominee),
           email: nominee.email,
           count: 0,
+          motivations: [],
         };
       }
       resultsByCategory[cat][nId].count++;
+
+      // Save motivation message if present
+      if (vote.motivations && vote.motivations.message) {
+        resultsByCategory[cat][nId].motivations.push(vote.motivations.message);
+      }
     });
   }
 
@@ -111,17 +120,29 @@ async function loadResults() {
         const rankLabel = i < 3 ? medals[i] : (i + 1);
         const barWidth = maxVotes > 0 ? (n.count / maxVotes) * 100 : 0;
 
-        return `
-          <div class="result-item" style="animation: countUp 0.5s ease ${0.1 * (i + 1)}s both;">
-            <div class="result-rank ${rankClass}">${rankLabel}</div>
-            <img class="result-avatar" src="${n.avatar}" alt="${n.name}" onerror="this.src='${DEFAULT_AVATAR}'">
-            <div class="result-info">
-              <div class="result-name">${n.name}</div>
-              <div class="result-bar-container">
-                <div class="result-bar" style="width: 0;" data-width="${barWidth}"></div>
-              </div>
+        let motivationsHtml = '';
+        if (n.motivations && n.motivations.length > 0) {
+          motivationsHtml = `
+            <div class="result-item-motivations">
+              ${n.motivations.map(m => `<div class="result-motivation-bubble">💬 "${m}"</div>`).join('')}
             </div>
-            <div class="result-votes">${n.count}</div>
+          `;
+        }
+
+        return `
+          <div class="result-item-wrapper" style="animation: countUp 0.5s ease ${0.1 * (i + 1)}s both;">
+            <div class="result-item">
+              <div class="result-rank ${rankClass}">${rankLabel}</div>
+              <img class="result-avatar" src="${n.avatar}" alt="${n.name}" onerror="this.src='${DEFAULT_AVATAR}'">
+              <div class="result-info">
+                <div class="result-name">${n.name}</div>
+                <div class="result-bar-container">
+                  <div class="result-bar" style="width: 0;" data-width="${barWidth}"></div>
+                </div>
+              </div>
+              <div class="result-votes">${n.count}</div>
+            </div>
+            ${motivationsHtml}
           </div>
         `;
       }).join('');
@@ -133,7 +154,9 @@ async function loadResults() {
           <span class="result-emoji">${cat.emoji}</span>
           <h3>${cat.name}</h3>
         </div>
-        ${bodyHtml}
+        <div class="result-list-container">
+          ${bodyHtml}
+        </div>
       </div>
     `;
   }).join('');
