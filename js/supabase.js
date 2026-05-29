@@ -16,6 +16,7 @@ const ADMIN_EMAILS = [
   'jessica@gritlab.ax',
   'anna-lena@gritlab.ax',
   'carolina@gritlab.ax',
+  'mohamed.bouras@gritlab.ax'
 ];
 
 const { createClient } = supabase;
