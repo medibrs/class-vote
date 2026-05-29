@@ -30,3 +30,31 @@ const CATEGORIES = [
 
 // Default avatar path
 const DEFAULT_AVATAR = './assets/default-avatar.svg';
+
+// Voting deadline: June 2, 2026 at 23:59 Finland time (EEST = UTC+3)
+const VOTE_DEADLINE = new Date('2026-06-02T23:59:00+03:00');
+
+/**
+ * Check if voting is still open
+ */
+function isVotingOpen() {
+  return new Date() < VOTE_DEADLINE;
+}
+
+/**
+ * Get time remaining until deadline as a formatted string
+ */
+function getTimeRemaining() {
+  const now = new Date();
+  const diff = VOTE_DEADLINE - now;
+
+  if (diff <= 0) return null;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m left`;
+  if (hours > 0) return `${hours}h ${minutes}m left`;
+  return `${minutes}m left`;
+}

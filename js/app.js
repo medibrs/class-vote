@@ -21,6 +21,15 @@ async function initVotingPage() {
   await loadMyVotes();
   renderCategoryCards();
   updateStats();
+  updateDeadlineDisplay();
+
+  // Update countdown every minute
+  setInterval(() => {
+    updateDeadlineDisplay();
+    if (!isVotingOpen()) {
+      renderCategoryCards(); // Re-render to disable cards
+    }
+  }, 60000);
 }
 
 /**
@@ -92,12 +101,23 @@ function renderCategoryCards() {
       </div>
     ` : '';
 
-    const statusHtml = vote
-      ? `<span class="category-status voted">✅ Voted</span>`
-      : `<span class="category-status">Tap to vote</span>`;
+    const votingOpen = isVotingOpen();
+    let statusHtml;
+    if (!votingOpen) {
+      statusHtml = vote
+        ? `<span class="category-status voted">✅ Voted</span>`
+        : `<span class="category-status">⏰ Voting closed</span>`;
+    } else {
+      statusHtml = vote
+        ? `<span class="category-status voted">✅ Voted</span>`
+        : `<span class="category-status">Tap to vote</span>`;
+    }
+
+    const clickHandler = votingOpen ? `onclick="openVoteModal('${cat.id}')"` : '';
+    const closedClass = !votingOpen ? 'voting-closed' : '';
 
     return `
-      <div class="category-card" style="--card-color: ${cat.color}" onclick="openVoteModal('${cat.id}')" id="card-${cat.id}">
+      <div class="category-card ${closedClass}" style="--card-color: ${cat.color}" ${clickHandler} id="card-${cat.id}">
         <span class="category-emoji">${cat.emoji}</span>
         <div class="category-name">${cat.name}</div>
         ${statusHtml}
@@ -196,6 +216,13 @@ function renderNomineeList(searchTerm) {
 async function castVote(nomineeId) {
   if (!activeCategory) return;
 
+  // Check deadline
+  if (!isVotingOpen()) {
+    showToast('Voting has closed! Deadline was June 2, 23:59 Finland time.', 'error');
+    closeVoteModal();
+    return;
+  }
+
   const categoryId = activeCategory.id;
 
   // Upsert: insert or update if exists
@@ -252,6 +279,23 @@ function updateStats() {
   if (votedEl) votedEl.textContent = votedCount;
   if (remainingEl) remainingEl.textContent = totalCount - votedCount;
   if (classEl) classEl.textContent = allProfiles.length;
+}
+
+/**
+ * Update the deadline countdown display
+ */
+function updateDeadlineDisplay() {
+  const deadlineEl = document.getElementById('deadline-display');
+  if (!deadlineEl) return;
+
+  if (isVotingOpen()) {
+    const remaining = getTimeRemaining();
+    deadlineEl.innerHTML = `⏰ <strong>${remaining}</strong> — Deadline: June 2, 23:59 (Finland time)`;
+    deadlineEl.className = 'deadline-banner open';
+  } else {
+    deadlineEl.innerHTML = '🔒 <strong>Voting is closed!</strong> Check out the results 🏆';
+    deadlineEl.className = 'deadline-banner closed';
+  }
 }
 
 /**

@@ -483,6 +483,39 @@ img {
   font-size: 1.05rem;
 }
 
+/* --- Deadline Banner --- */
+.deadline-banner {
+  text-align: center;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+  font-size: 0.95rem;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+.deadline-banner.open {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.deadline-banner.closed {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+/* --- Voting Closed Card State --- */
+.category-card.voting-closed {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.category-card.voting-closed:hover {
+  transform: none;
+  box-shadow: var(--shadow-md);
+}
+
 /* --- Category Cards Grid --- */
 .categories-grid {
   display: grid;
@@ -731,8 +764,8 @@ img {
 }
 
 .nominee-avatar {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-full);
   object-fit: cover;
   border: 2px solid var(--glass-border);
@@ -746,7 +779,7 @@ img {
 
 .nominee-name {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
