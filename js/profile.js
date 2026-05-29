@@ -66,9 +66,10 @@ async function handleAvatarUpload(event) {
     return;
   }
 
-  // Validate file size (2MB max)
-  if (file.size > 2 * 1024 * 1024) {
-    showProfileToast('Image must be less than 2MB.', 'error');
+  // Validate file size (900KB max)
+  const maxBytes = 900 * 1024;
+  if (file.size > maxBytes) {
+    showProfileToast('Image must be less than 900KB (900ko).', 'error');
     return;
   }
 
