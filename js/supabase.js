@@ -11,6 +11,13 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 🔒 SITE LOCKDOWN — set to true to block all access
 const SITE_LOCKED = true;
 
+// 👑 Admin emails — only these can see the Results page
+const ADMIN_EMAILS = [
+  'jessica@gritlab.ax',
+  'anna-lena@gritlab.ax',
+  'carolina@gritlab.ax',
+];
+
 const { createClient } = supabase;
 const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

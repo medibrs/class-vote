@@ -6,7 +6,7 @@
  * Initialize the results page
  */
 async function initResultsPage() {
-  const session = await requireAuth();
+  const session = await requireAdmin();
   if (!session) return;
 
   await populateNavbar();

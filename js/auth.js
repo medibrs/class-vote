@@ -148,7 +148,31 @@ function getAvatarUrl(profile) {
 }
 
 /**
+ * Check if an email is an admin
+ */
+function isAdmin(email) {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
+/**
+ * Auth guard for admin-only pages (results)
+ */
+async function requireAdmin() {
+  const session = await requireAuth();
+  if (!session) return null;
+
+  if (!isAdmin(session.user.email)) {
+    window.location.href = '/app';
+    return null;
+  }
+
+  return session;
+}
+
+/**
  * Populate the navbar with user info
+ * Hides the Results link for non-admin users
  */
 async function populateNavbar() {
   const profile = await getCurrentProfile();
@@ -164,5 +188,11 @@ async function populateNavbar() {
 
   if (nameEl) {
     nameEl.textContent = profile.display_name || profile.email.split('@')[0];
+  }
+
+  // Hide Results link for non-admins
+  const resultsLink = document.getElementById('nav-results');
+  if (resultsLink && !isAdmin(profile.email)) {
+    resultsLink.parentElement.style.display = 'none';
   }
 }
