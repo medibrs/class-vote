@@ -186,6 +186,7 @@ function openVoteModal(categoryId) {
   renderNomineeList('');
 
   overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
   if (searchInput) {
     searchInput.value = '';
     setTimeout(() => searchInput.focus(), 300);
@@ -226,6 +227,7 @@ function goBackToNominees() {
 function closeVoteModal() {
   const overlay = document.getElementById('vote-modal');
   overlay.classList.remove('active');
+  document.body.style.overflow = '';
   activeCategory = null;
   selectedNomineeId = null;
   selectedMotivationId = null;

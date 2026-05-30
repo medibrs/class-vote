@@ -640,7 +640,10 @@ img {
 /* --- Voting Modal --- */
 .modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -652,6 +655,7 @@ img {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-base);
+  overflow: hidden;
 }
 
 .modal-overlay.active {
@@ -671,6 +675,8 @@ img {
   box-shadow: var(--shadow-lg);
   transform: scale(0.9) translateY(20px);
   transition: transform var(--transition-bounce);
+  overflow: hidden;
+  min-height: 0;
 }
 
 .modal-overlay.active .modal {
@@ -743,7 +749,10 @@ img {
 .modal-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: var(--space-sm);
+  overscroll-behavior: contain;
+  min-height: 0;
 }
 
 .modal-body::-webkit-scrollbar {
