@@ -317,9 +317,72 @@ async function selectNominee(nomineeId) {
     motivationInput.value = '';
     document.getElementById('motivation-char-count').textContent = '0';
   }
+  // Load all existing motivations for this category (from all nominees)
+  await loadExistingMotivations(activeCategory.id);
 
   // Show step 2
   showModalStep('motivation');
+}
+
+/**
+ * Load ALL existing motivations for a category (across all nominees)
+ * so users can pick one or write their own
+ */
+async function loadExistingMotivations(categoryId) {
+  const list = document.getElementById('motivation-existing-list');
+  if (!list) return;
+
+  const { data, error } = await _supabase
+    .from('motivations')
+    .select('id, message')
+    .eq('category', categoryId);
+
+  if (error) {
+    console.error('Failed to load motivations:', error);
+    list.innerHTML = '';
+    return;
+  }
+
+  // Deduplicate by message text (keep first occurrence)
+  const seen = new Set();
+  const unique = [];
+  (data || []).forEach(m => {
+    if (!seen.has(m.message.toLowerCase())) {
+      seen.add(m.message.toLowerCase());
+      unique.push(m);
+    }
+  });
+
+  if (unique.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = unique.map(m => `
+    <div class="motivation-chip" onclick="selectMotivation('${m.id}', this)" id="motivation-${m.id}">
+      <span class="motivation-chip-icon">💬</span>
+      <span class="motivation-chip-text">${escapeHtml(m.message)}</span>
+    </div>
+  `).join('');
+}
+
+/**
+ * Select an existing motivation chip
+ */
+function selectMotivation(motivationId, element) {
+  // Deselect all chips
+  document.querySelectorAll('.motivation-chip.selected').forEach(el => el.classList.remove('selected'));
+  
+  // Select this one
+  element.classList.add('selected');
+  selectedMotivationId = motivationId;
+
+  // Clear the text input since they picked an existing one
+  const motivationInput = document.getElementById('motivation-input');
+  if (motivationInput) {
+    motivationInput.value = '';
+    document.getElementById('motivation-char-count').textContent = '0';
+  }
 }
 
 /**
@@ -329,8 +392,14 @@ async function submitVoteWithNewMotivation() {
   const motivationInput = document.getElementById('motivation-input');
   const message = motivationInput ? motivationInput.value.trim() : '';
 
+  if (selectedMotivationId) {
+    // They selected an existing motivation
+    await submitVoteWithMotivation(selectedMotivationId);
+    return;
+  }
+
   if (!message) {
-    // No motivation written — submit without
+    // No motivation written and none selected — submit without
     await submitVoteWithMotivation(null);
     return;
   }
