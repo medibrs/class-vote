@@ -747,20 +747,16 @@ img {
 }
 
 .modal-body {
-  flex: 1 1 0;
-  height: 0;
-  overflow: scroll;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-sm);
   overscroll-behavior: contain;
+  /* 80vh modal - header (~70px) - search (~60px) - padding */
+  max-height: calc(80vh - 140px);
 }
 
 #modal-step-nominee,
 #modal-step-motivation {
-  flex: 1 1 0;
-  height: 0;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 }
 
@@ -1487,6 +1483,10 @@ img {
   .modal {
     max-height: 90vh;
     margin: var(--space-md);
+  }
+
+  .modal-body {
+    max-height: calc(90vh - 140px);
   }
 
   .page-header h1 {
