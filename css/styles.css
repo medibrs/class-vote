@@ -748,7 +748,7 @@ img {
 
 .modal-body {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-sm);
   overscroll-behavior: contain;
