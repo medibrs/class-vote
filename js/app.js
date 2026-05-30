@@ -318,82 +318,8 @@ async function selectNominee(nomineeId) {
     document.getElementById('motivation-char-count').textContent = '0';
   }
 
-  // Load existing motivations for this nominee+category
-  await loadExistingMotivations(activeCategory.id, nomineeId);
-
   // Show step 2
   showModalStep('motivation');
-}
-
-/**
- * Load existing motivations for a nominee in a category
- */
-async function loadExistingMotivations(categoryId, nomineeId) {
-  const list = document.getElementById('motivation-existing-list');
-  if (!list) return;
-
-  const { data, error } = await _supabase
-    .from('motivations')
-    .select('id, message')
-    .eq('category', categoryId)
-    .eq('nominee_id', nomineeId);
-
-  if (error) {
-    console.error('Failed to load motivations:', error);
-    list.innerHTML = '';
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    list.innerHTML = '<div class="motivation-empty">Be the first to write a motivation! ✍️</div>';
-    return;
-  }
-
-  // Count how many votes use each motivation
-  const { data: votesData } = await _supabase
-    .from('votes')
-    .select('motivation_id')
-    .eq('category', categoryId)
-    .eq('nominee_id', nomineeId)
-    .not('motivation_id', 'is', null);
-
-  const motivationCounts = {};
-  if (votesData) {
-    votesData.forEach(v => {
-      motivationCounts[v.motivation_id] = (motivationCounts[v.motivation_id] || 0) + 1;
-    });
-  }
-
-  list.innerHTML = data.map(m => {
-    const count = motivationCounts[m.id] || 0;
-    const countLabel = count > 0 ? `${count} vote${count > 1 ? 's' : ''}` : '';
-    return `
-      <div class="motivation-chip" onclick="selectMotivation('${m.id}', this)" id="motivation-${m.id}">
-        <span class="motivation-chip-icon">💬</span>
-        <span class="motivation-chip-text">${escapeHtml(m.message)}</span>
-        ${countLabel ? `<span class="motivation-chip-count">${countLabel}</span>` : ''}
-      </div>
-    `;
-  }).join('');
-}
-
-/**
- * Select an existing motivation chip
- */
-function selectMotivation(motivationId, element) {
-  // Deselect all chips
-  document.querySelectorAll('.motivation-chip.selected').forEach(el => el.classList.remove('selected'));
-  
-  // Select this one
-  element.classList.add('selected');
-  selectedMotivationId = motivationId;
-
-  // Clear the text input since they picked an existing one
-  const motivationInput = document.getElementById('motivation-input');
-  if (motivationInput) {
-    motivationInput.value = '';
-    document.getElementById('motivation-char-count').textContent = '0';
-  }
 }
 
 /**
@@ -403,14 +329,8 @@ async function submitVoteWithNewMotivation() {
   const motivationInput = document.getElementById('motivation-input');
   const message = motivationInput ? motivationInput.value.trim() : '';
 
-  if (selectedMotivationId) {
-    // They selected an existing motivation
-    await submitVoteWithMotivation(selectedMotivationId);
-    return;
-  }
-
   if (!message) {
-    // No motivation written and none selected — submit without
+    // No motivation written — submit without
     await submitVoteWithMotivation(null);
     return;
   }
