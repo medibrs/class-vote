@@ -99,10 +99,10 @@ async function loadMyVotes() {
       const motivation = vote.motivations;
       currentVotes[vote.category] = {
         nominee_id: vote.nominee_id,
-        nominee_name: nominee ? nominee.display_name : 'Unknown',
+        nominee_name: escapeHtml(nominee ? nominee.display_name : 'Unknown'),
         nominee_avatar: nominee ? getAvatarUrl(nominee) : DEFAULT_AVATAR,
         motivation_id: vote.motivation_id,
-        motivation_text: motivation ? motivation.message : null,
+        motivation_text: motivation ? escapeHtml(motivation.message) : null,
       };
     });
   }
@@ -267,14 +267,14 @@ function renderNomineeList(searchTerm) {
   list.innerHTML = nominees.map(p => {
     const isSelected = currentVote && currentVote.nominee_id === p.id;
     const avatar = getAvatarUrl(p);
-    const name = p.display_name || p.email.split('@')[0];
+    const name = escapeHtml(p.display_name || p.email.split('@')[0]);
 
     return `
       <div class="nominee-item ${isSelected ? 'selected' : ''}" onclick="selectNominee('${p.id}')" id="nominee-${p.id}">
         <img class="nominee-avatar" src="${avatar}" alt="${name}" onerror="this.src='${DEFAULT_AVATAR}'">
         <div class="nominee-info">
           <div class="nominee-name">${name}</div>
-          <div class="nominee-email">${p.email}</div>
+          <div class="nominee-email">${escapeHtml(p.email)}</div>
         </div>
         <div class="nominee-check">${isSelected ? '✓' : ''}</div>
       </div>
@@ -298,7 +298,7 @@ async function selectNominee(nomineeId) {
   selectedMotivationId = null;
 
   const nominee = allProfiles.find(p => p.id === nomineeId);
-  const nomineeName = nominee ? (nominee.display_name || nominee.email.split('@')[0]) : 'Unknown';
+  const nomineeName = escapeHtml(nominee ? (nominee.display_name || nominee.email.split('@')[0]) : 'Unknown');
   const nomineeAvatar = nominee ? getAvatarUrl(nominee) : DEFAULT_AVATAR;
 
   // Update motivation header

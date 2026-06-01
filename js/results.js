@@ -3,6 +3,15 @@
 // ============================================
 
 /**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
  * Initialize the results page
  */
 async function initResultsPage() {
@@ -87,7 +96,7 @@ async function loadResults() {
       if (!resultsByCategory[cat][nId]) {
         resultsByCategory[cat][nId] = {
           id: nId,
-          name: nominee.display_name || nominee.email.split('@')[0],
+          name: escapeHtml(nominee.display_name || nominee.email.split('@')[0]),
           avatar: getAvatarUrl(nominee),
           email: nominee.email,
           count: 0,
@@ -124,7 +133,7 @@ async function loadResults() {
         if (n.motivations && n.motivations.length > 0) {
           motivationsHtml = `
             <div class="result-item-motivations">
-              ${n.motivations.map(m => `<div class="result-motivation-bubble">💬 "${m}"</div>`).join('')}
+              ${n.motivations.map(m => `<div class="result-motivation-bubble">💬 "${escapeHtml(m)}"</div>`).join('')}
             </div>
           `;
         }
