@@ -195,7 +195,7 @@ async function populateNavbar() {
 
   const resultsLink = document.getElementById('nav-results');
   if (resultsLink) {
-    resultsLink.parentElement.style.display = isAdminUser ? '' : 'none';
+    resultsLink.parentElement.style.display = ''; // Show Results to all classmates
   }
 
   const usersLink = document.getElementById('nav-users');

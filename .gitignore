@@ -1,2 +1,4 @@
-local/
+local/*
+!local/data.json
+!local/data.js
 js/config.js

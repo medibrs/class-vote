@@ -7,6 +7,635 @@
   <title>Class Vote 🗳️ — Results</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
   <link rel="stylesheet" href="./css/styles.css">
+  <style>
+    /* Premium results layout overrides */
+    :root {
+      --bg3: rgba(255, 255, 255, 0.03);
+      --gold: #fbbf24;
+      --silver: #94a3b8;
+      --bronze: #f97316;
+      --green: #34d399;
+      --red: #f87171;
+      --primary: #8b5cf6;
+    }
+
+    /* Summary bar */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-pill {
+      background: var(--bg3);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+
+    .stat-pill .val {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-pill .lbl {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .val.purple { color: var(--primary); }
+    .val.green  { color: var(--green); }
+    .val.red    { color: var(--red); }
+    .val.gold   { color: var(--gold); }
+
+    /* Section headers */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-text);
+    }
+
+    /* Category rankings grid */
+    .rankings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .rank-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .rank-card-header {
+      padding: 0.9rem 1.2rem;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--color-border);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.15s;
+    }
+
+    .rank-row:last-child { border-bottom: none; }
+    .rank-row:hover { background: var(--bg3); }
+
+    .rank-medal {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .rank-num {
+      width: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .rank-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid var(--color-border);
+    }
+
+    .rank-name {
+      flex: 1;
+      font-size: 0.88rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+
+    .rank-bar-wrap {
+      width: 60px;
+      height: 6px;
+      background: var(--color-border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .rank-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--primary), #06b6d4);
+      transition: width 0.8s ease;
+    }
+
+    .rank-votes {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .empty-row {
+      padding: 1rem 1.2rem;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* Category spotlight */
+    .spotlight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .spotlight-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .spotlight-cat {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: left;
+    }
+
+    .spotlight-winner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .spotlight-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold);
+    }
+
+    .spotlight-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .spotlight-votes {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      text-align: left;
+    }
+
+    .no-votes {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      text-align: left;
+    }
+
+    /* Who voted table */
+    .voter-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .voter-table th {
+      background: var(--bg3);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .voter-table td {
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .voter-table tr:last-child td { border-bottom: none; }
+    .voter-table tr:hover td { background: var(--bg3); }
+
+    .voter-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .voter-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--color-border);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge.voted   { background: rgba(52,211,153,0.15); color: var(--green); }
+    .badge.not-yet { background: rgba(248,113,113,0.15); color: var(--red); }
+    .badge.complete { background: rgba(139,92,246,0.15); color: var(--primary); }
+
+    .progress-cell { min-width: 140px; }
+
+    .mini-progress {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .mini-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--color-border);
+      cursor: default;
+      position: relative;
+    }
+
+    .mini-dot.filled { background: var(--primary); }
+    .mini-dot:hover::after {
+      content: attr(data-cat);
+      position: absolute;
+      bottom: 115%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1e2e;
+      border: 1px solid var(--color-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      color: var(--color-text);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .voter-count-label {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-left: 4px;
+    }
+
+    /* Individual vote details */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .detail-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1.2rem;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      user-select: none;
+      text-align: left;
+    }
+
+    .detail-header:hover { background: rgba(139,92,246,0.1); }
+
+    .detail-header-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .detail-header-name {
+      flex: 1;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .detail-header-count {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .detail-toggle {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      transition: transform 0.2s;
+    }
+
+    .detail-body { display: none; }
+    .detail-body.open { display: block; }
+
+    .detail-vote-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.65rem 1.2rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.83rem;
+    }
+
+    .detail-vote-row:last-child { border-bottom: none; }
+
+    .detail-cat-emoji {
+      flex-shrink: 0;
+      width: 22px;
+      text-align: center;
+    }
+
+    .detail-cat-name {
+      color: var(--color-text-muted);
+      min-width: 120px;
+      flex-shrink: 0;
+      text-align: left;
+    }
+
+    .detail-nominee {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+      text-align: left;
+    }
+
+    .detail-nominee-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--color-border);
+    }
+
+    .detail-nominee-name {
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .detail-motivation {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      font-size: 0.78rem;
+    }
+
+    .detail-no-vote {
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+
+    .not-voted-card .detail-header { opacity: 0.5; }
+
+    /* Overall Leaderboard styles */
+    .overall-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .podium-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1.25rem;
+      margin: 1.5rem 0 2rem;
+      flex-wrap: wrap;
+    }
+
+    .podium-step {
+      background: var(--bg3);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.75rem 1rem 1.25rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 1;
+      min-width: 160px;
+      max-width: 220px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .podium-step:hover { transform: translateY(-4px); }
+
+    .podium-step.first {
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(251, 191, 36, 0.08);
+      order: 2;
+      padding-top: 2.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .podium-step.first:hover { box-shadow: 0 6px 24px rgba(251, 191, 36, 0.15); }
+
+    .podium-step.second {
+      border-color: var(--silver);
+      box-shadow: 0 4px 20px rgba(148, 163, 184, 0.05);
+      order: 1;
+    }
+
+    .podium-step.third {
+      border-color: var(--bronze);
+      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.05);
+      order: 3;
+    }
+
+    .podium-badge {
+      position: absolute;
+      top: -15px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #000;
+    }
+
+    .podium-step.first .podium-badge { background: var(--gold); }
+    .podium-step.second .podium-badge { background: var(--silver); }
+    .podium-step.third .podium-badge { background: var(--bronze); }
+
+    .podium-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 0.75rem;
+      border: 2px solid var(--color-border);
+    }
+    .podium-step.first .podium-avatar { border-color: var(--gold); width: 80px; height: 80px; }
+    .podium-step.second .podium-avatar { border-color: var(--silver); }
+    .podium-step.third .podium-avatar { border-color: var(--bronze); }
+
+    .podium-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .podium-votes {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .podium-label {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .cat-mini-badges {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.4rem;
+    }
+
+    .cat-mini-badge {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .cat-mini-badge .count {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .overall-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .overall-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: var(--bg3);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+
+    .overall-item:hover { background: rgba(255,255,255,0.02); }
+
+    .overall-rank {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      width: 28px;
+      text-align: center;
+    }
+
+    .overall-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--color-border);
+    }
+
+    .overall-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .overall-votes-pill {
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.2);
+      color: var(--primary);
+      padding: 0.2rem 0.65rem;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-left: auto;
+    }
+  </style>
 </head>
 <body>
   <!-- Animated Background -->
@@ -22,7 +651,7 @@
       </a>
       <ul class="navbar-nav">
         <li><a href="/app" id="nav-vote">🗳️ Vote</a></li>
-        <li style="display:none;"><a href="/results" class="active" id="nav-results">🏆 Results</a></li>
+        <li><a href="/results" class="active" id="nav-results">🏆 Results</a></li>
         <li style="display:none;"><a href="/users" id="nav-users">👥 Users</a></li>
         <li style="display:none;"><a href="/admin" id="nav-admin">👑 Admins</a></li>
         <li><a href="/profile" id="nav-profile">👤 Profile</a></li>
@@ -38,28 +667,15 @@
     <main class="main-content">
       <div class="page-header">
         <h1>🏆 Results</h1>
-        <p>See who's leading in each category</p>
+        <p>Loading results configuration...</p>
       </div>
 
-      <!-- Stats Bar -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <div class="stat-value" id="stat-total-voters">0</div>
-          <div class="stat-label">Total Voters</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="stat-total-votes">0</div>
-          <div class="stat-label">Total Votes</div>
-        </div>
-      </div>
-
-      <!-- Results Grid -->
-      <div class="results-grid" id="results-grid">
-        <!-- Rendered by JS -->
-        <div class="loading-container" style="grid-column: 1 / -1;">
+      <!-- Results Container (replaces stats bar and results grid) -->
+      <div id="results-container">
+        <div class="loading-container">
           <div>
             <div class="spinner"></div>
-            <div class="loading-text">Loading results...</div>
+            <div class="loading-text">Loading frozen results...</div>
           </div>
         </div>
       </div>
@@ -69,7 +685,10 @@
   <!-- Toast Notifications -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Supabase SDK -->
+  <!-- Load local static data first -->
+  <script src="./local/data.js"></script>
+
+  <!-- Supabase SDK and App Scripts -->
   <script src="./js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./js/supabase.js"></script>
